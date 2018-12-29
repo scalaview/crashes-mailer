@@ -1,0 +1,37 @@
+{
+  "name": "crashes-mailer",
+  "version": "1.0.0",
+  "description": "PM2 Module Send mail when get crashes",
+  "main": "app.js",
+  "dependencies": {
+    "pmx": "beta",
+    "pm2": "latest",
+    "nodemailer": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scalaview/crashes-mailer.git"
+  },
+  "config": {
+    "smtp": {
+      "host": "your-smtp-host",
+      "port": 587,
+      "user": "your-smtp-user",
+      "password": "your-smtp-password",
+      "disabled": false
+    },
+    "from": "from mail",
+    "mailTo": "mail1,mail2",
+    "replyTo": "",
+    "prefix_subject": "your prefix subject"
+  },
+  "apps": [
+    {
+      "merge_logs": true,
+      "max_memory_restart": "200M",
+      "script": "app.js"
+    }
+  ],
+  "author": "scalaview",
+  "license": "MIT"
+}
