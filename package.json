@@ -23,7 +23,8 @@
     "from": "from mail",
     "mailTo": "mail1,mail2",
     "replyTo": "",
-    "prefix_subject": "your prefix subject"
+    "prefix_subject": "your prefix subject",
+    "monitor_processes": ["your application name"]
   },
   "apps": [
     {

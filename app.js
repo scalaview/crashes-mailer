@@ -19,9 +19,8 @@ pmx.initModule({
     const mailer = new Mail(config)
     pm2.launchBus(function(err, bus) {
         bus.on('log:err', function(data) {
-            console.log(data)
-            if(data.process.name !== "crashes-mailer")
-                mailer.send(`${data.process.name} ${data.data.slice(0, 30)}`, data.data)
+            if(config.monitor_processes.indexOf(data.process.name) !== -1 )
+                mailer.send(`${data.process.name} ${data.data.slice(0, 100)}`, data.data)
         });
     });
 });
