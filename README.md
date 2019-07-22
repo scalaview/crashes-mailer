@@ -5,19 +5,21 @@
 vim ~/.pm2/module_conf.json
 
 {
-  "smtp":
-    {
-        "host": "host",
-        "port": 587,
-        "user": "user",
-        "password": "[password]",
-        "disabled": false
-    },
+    "crashes-mailer": {
+        "smtp": {
+          "host": "your-host",
+          "port": 587,
+          "user": "your-user",
+          "password": "pwd",
+          "disabled": false
+        },
         "from": "from",
-        "mailTo": "mail1, mail2",
+        "mailTo": "to mail",
         "replyTo": "",
-        "prefix_subject": "[prefix]",
-        "monitor_processes": ["your process name"]
+        "prefix_subject": "prefix",
+        "monitor_processes": ["your_process"],
+        "interval": 43200000,
+        "times": [0, 10, 100]
     }
 }
 
