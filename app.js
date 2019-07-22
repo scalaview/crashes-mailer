@@ -31,7 +31,7 @@ pmx.initModule({
     pm2.launchBus(function(err, bus) {
         bus.on('log:err', function(data) {
             if(config.monitor_processes.indexOf(data.process.name) !== -1 ){
-                var record = n_times_filter(db, crashelogs, data.data)
+                var record = n_times_filter(config, db, crashelogs, data.data)
                 if(record == null)
                     return
                 var times = record.count > 0 ? `${record.count} times` : ""
@@ -41,11 +41,11 @@ pmx.initModule({
     });
 });
 
-function n_times_filter(db, crashelogs, body){
+function n_times_filter(config, db, crashelogs, body){
     let content =  body.slice(0, 100),
         now = (new Date()).getTime(),
-        twoHours = (2 * 60 * 60 * 1000),
-        results = crashelogs.find({timestamp: { $gt: now - twoHours }}),
+        interval = config.interval,
+        results = crashelogs.find({timestamp: { $gt: now - interval }}),
         target = null
 
     if(results == null || results.length <= 0){
@@ -58,7 +58,6 @@ function n_times_filter(db, crashelogs, body){
             if( natural.JaroWinklerDistance(result.content, content) > 0.6 ){ // consider tow content are same
                 target = result
                 target.count += 1
-                target.timestamp = now
                 crashelogs.update(target)
                 findOne = true
                 break
@@ -70,7 +69,7 @@ function n_times_filter(db, crashelogs, body){
         }
     }
     db.saveDatabase();
-    if([0, 10, 100].indexOf(target.count) !== -1){
+    if(config.times.indexOf(target.count) !== -1){
         return target
     }else{
         return null
