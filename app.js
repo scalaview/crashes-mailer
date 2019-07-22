@@ -30,7 +30,7 @@ pmx.initModule({
     pm2.launchBus(function(err, bus) {
         bus.on('log:err', function(data) {
             if(config.monitor_processes.indexOf(data.process.name) !== -1 ){
-                var record = n_times_filter(crashelogs, data.data)
+                var record = n_times_filter(db, crashelogs, data.data)
                 if(record == null)
                     return
                 var times = record.count > 0 ? `${record.count} times` : ""
@@ -40,7 +40,7 @@ pmx.initModule({
     });
 });
 
-function n_times_filter(crashelogs, body){
+function n_times_filter(db, crashelogs, body){
     let content =  body.slice(0, 100),
         now = (new Date()).getTime(),
         twoHours = (2 * 60 * 60 * 1000),
@@ -49,7 +49,7 @@ function n_times_filter(crashelogs, body){
 
     if(results == null || results.length <= 0){
         target = { content: content, count: 0, timestamp: now }
-        crashelogs.insert(result);
+        crashelogs.insert(target);
     }else{
         let findOne = false;
         for(let i=0; i<results.length; i++){
@@ -64,7 +64,7 @@ function n_times_filter(crashelogs, body){
             }
         }
         if(!findOne){
-            target = { content: content, count: 0, timestamp: (new Date()).getTime() }
+            target = { content: content, count: 0, timestamp: now }
             crashelogs.insert(target);
         }
     }
