@@ -3,6 +3,7 @@ const pm2       = require('pm2');
 const fs = require('fs');
 const Mail = require('./mail');
 const loki = require('lokijs');
+const lfsa = require('lokijs/src/loki-fs-structured-adapter');
 const natural = require('natural');
 
 pmx.initModule({
@@ -18,11 +19,14 @@ pmx.initModule({
     }
 }, async (ex, config) => {
     const mailer = new Mail(config)
+    var lfsaAdapter = new lfsa();
     var db = new loki('/tmp/crashes.json', {
         autoload: true,
         autosave: true,
-        autosaveInterval: 4000
+        autosaveInterval: 4000,
+        adapter: lfsaAdapter
     });
+    db.loadDatabase({});
     var crashelogs = db.getCollection("crashelogs");
     if (crashelogs === null) {
         crashelogs = db.addCollection("crashelogs");
