@@ -44,31 +44,33 @@ function n_times_filter(crashelogs, body){
     let content =  body.slice(0, 100),
         now = (new Date()).getTime(),
         twoHours = (2 * 60 * 60 * 1000),
-        results = crashelogs.find({timestamp: { $gt: now - twoHours }});
+        results = crashelogs.find({timestamp: { $gt: now - twoHours }}),
+        target = null
 
     if(results == null || results.length <= 0){
-        var result = { content: content, count: 0, timestamp: now }
+        target = { content: content, count: 0, timestamp: now }
         crashelogs.insert(result);
     }else{
         let findOne = false;
         for(let i=0; i<results.length; i++){
             var result = results[i]
             if( natural.JaroWinklerDistance(result.content, content) > 0.6 ){ // consider tow content are same
-                result.count += 1
-                result.timestamp = now
-                crashelogs.update(result)
+                target = result
+                target.count += 1
+                target.timestamp = now
+                crashelogs.update(target)
                 findOne = true
                 break
             }
         }
         if(!findOne){
-            var result = { content: content, count: 0, timestamp: (new Date()).getTime() }
-            crashelogs.insert(result);
+            target = { content: content, count: 0, timestamp: (new Date()).getTime() }
+            crashelogs.insert(target);
         }
     }
     db.saveDatabase();
-    if([0, 10, 100].indexOf(result.count) !== -1){
-        return result
+    if([0, 10, 100].indexOf(target.count) !== -1){
+        return target
     }else{
         return null
     }
