@@ -2,8 +2,8 @@ const pmx = require("pmx");
 const pm2       = require('pm2');
 const fs = require('fs');
 const Mail = require('./mail');
-const loki = require('lokijs')
-
+const loki = require('lokijs');
+const natural = require('natural');
 
 pmx.initModule({
     type: "generic",
@@ -18,10 +18,9 @@ pmx.initModule({
     }
 }, async (ex, config) => {
     const mailer = new Mail(config)
-    const db = new loki('./crashes.json', {
+    const db = new loki('/tmp/crashes.json', {
         autoload: true,
         autosave: true,
-        autosaveInterval: 4000
     });
     var crashelogs = db.getCollection("crashelogs");
     if (crashelogs === null) {
@@ -34,24 +33,40 @@ pmx.initModule({
                 var record = n_times_filter(crashelogs, data.data)
                 if(record == null)
                     return
-                var times = record.count > 0 ? "" : `${record.count} times`
+                var times = record.count > 0 ? `${record.count} times` : ""
                 mailer.send(`${data.process.name} ${times} ${data.data.slice(0, 100)}`, data.data)
             }
         });
     });
 });
 
-
 function n_times_filter(crashelogs, body){
-    var content =  body.slice(0, 100),
-        result = crashelogs.findOne({ content: content });
-    if(result == null){
-        result = { content: content, count: 0 }
+    let content =  body.slice(0, 100),
+        now = (new Date()).getTime(),
+        twoHours = (2 * 60 * 60 * 1000),
+        results = crashelogs.find({timestamp: { $gt: now - twoHours }});
+
+    if(results == null){
+        let result = { content: content, count: 0, timestamp: now }
         crashelogs.insert(result);
     }else{
-        result.count += 1
-        crashelogs.update(result)
+        let findOne = false;
+        for(let i=0; i<result.length; i++){
+            let result = results[i]
+            if( natural.JaroWinklerDistance(result.content, content) > 0.6 ){ // consider tow content are same
+                result.count += 1
+                result.timestamp = now
+                crashelogs.update(result)
+                findOne = true
+                break
+            }
+        }
+        if(!findOne){
+            let result = { content: content, count: 0, timestamp: (new Date()).getTime() }
+            crashelogs.insert(result);
+        }
     }
+    db.saveDatabase();
     if([0, 10, 100].indexOf(result.count) !== -1){
         return result
     }else{
