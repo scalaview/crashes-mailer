@@ -18,9 +18,10 @@ pmx.initModule({
     }
 }, async (ex, config) => {
     const mailer = new Mail(config)
-    const db = new loki('/tmp/crashes.json', {
+    var db = new loki('/tmp/crashes.json', {
         autoload: true,
         autosave: true,
+        autosaveInterval: 4000
     });
     var crashelogs = db.getCollection("crashelogs");
     if (crashelogs === null) {
