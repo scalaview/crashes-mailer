@@ -4,9 +4,10 @@
   "description": "PM2 Module Send mail when get crashes",
   "main": "app.js",
   "dependencies": {
-    "pmx": "beta",
+    "lokijs": "^1.5.6",
+    "nodemailer": "latest",
     "pm2": "latest",
-    "nodemailer": "latest"
+    "pmx": "beta"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,9 @@
     "mailTo": "mail1,mail2",
     "replyTo": "",
     "prefix_subject": "your prefix subject",
-    "monitor_processes": ["your application name"]
+    "monitor_processes": [
+      "your application name"
+    ]
   },
   "apps": [
     {
